@@ -14,7 +14,10 @@ const ArticlesService = {
     return db
       .insert(newItem)
       .into('blogful_articles')
-      .returning('*');
+      .returning('*')
+      .then(rows => {
+        return rows[0];
+      });
   },
   updateArticle(db,id,itemInfo) {
     return db

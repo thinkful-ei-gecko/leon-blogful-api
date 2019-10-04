@@ -5,9 +5,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
 const ArticlesService = require('./ArticlesService');
+const articlesRouter = require('./articles/articles-router');
 
 
 const app = express();
+const jsonParser = express.json();
 
 const morganOption = (NODE_ENV === 'production')
   ? 'tiny'
@@ -21,6 +23,13 @@ app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
 
+app.get('/xss', (req, res) => {
+  res.cookie('secretToken', '1234567890');
+  res.sendFile(__dirname + '/xss-example.html');
+});
+
+app.use('/articles', articlesRouter);
+
 app.use(function errorHandler(error, req, res, next) {
   let response;
   if (NODE_ENV === 'production') {
@@ -32,27 +41,6 @@ app.use(function errorHandler(error, req, res, next) {
   res.status(500).json(response);
 });
 
-app.get('/articles', (req,res, next) => {
-  const knexInstance = req.app.get('db');
-  ArticlesService.getArticles(knexInstance)
-    .then(articles => {
-      res.json(articles);
-    })
-    .catch(next);
-});
 
-app.get('/articles/:article_id',(req,res,next) => {
-  const knexInstance = req.app.get('db');
-  ArticlesService.findById(knexInstance,req.params.article_id)
-    .then(article => {
-      if (!article) {
-        return res.status(404).json({
-          error: {message: `Article doesn't exist`}
-        });
-      }
-      res.json(article);    })
-    .catch(next);
-
-});
 
 module.exports = app;

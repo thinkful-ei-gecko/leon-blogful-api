@@ -105,7 +105,7 @@ describe('Articles Service', () => {
       };
       return ArticlesService.createArticle(db,newArticle)
         .then(data => {
-          expect(data[0]).to.eql(newArticle);
+          expect(data).to.eql(newArticle);
         });
     });
   });
